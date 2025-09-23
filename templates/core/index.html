@@ -1,18 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - HMS{% endblock %}
+{% block title %}Home - Your Partner in Health and Wellness{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-page {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto text-center">
-        <h1 class="display-4">Hospital Management System</h1>
-        <p class="lead">Efficient patient care and hospital management</p>
-        
+<section class="hero-section">
+    <div class="glass-card auth-card text-center">
+        <div class="mb-5">
+            <i class="fas fa-heartbeat fa-3x mb-3" style="color: #2563eb;"></i>
+            <h1 class="h2 fw-bold mb-3">Your Partner in Health and Wellness</h1>
+            <p class="text-muted mb-4">
+                We are committed to providing you with the best medical and healthcare services 
+                to help you live healthier and happier
+            </p>
+        </div>
+
         {% if not user.is_authenticated %}
-            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Get Started</a>
+        <div class="d-grid gap-3">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+            <a href="#" class="btn btn-outline-primary btn-lg" onclick="HMS.showNotification('Registration feature coming soon!', 'info')">
+                <i class="fas fa-user-plus me-2"></i>Register
+            </a>
+        </div>
         {% else %}
-            <a href="{% url 'dashboard' %}" class="btn btn-success btn-lg">Go to Dashboard</a>
+        <div class="d-grid gap-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
         {% endif %}
+
+        <div class="mt-5 pt-4 border-top">
+            <small class="text-muted">
+                <i class="fas fa-shield-alt me-1"></i>Secure & HIPAA Compliant
+            </small>
+        </div>
     </div>
-</div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Homepage specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Homepage loaded successfully');
+    
+    // Add any homepage-specific JavaScript here
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.classList.contains('btn-primary')) {
+                HMS.showLoading(this);
+                setTimeout(() => HMS.hideLoading(this, this.innerHTML), 1000);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
