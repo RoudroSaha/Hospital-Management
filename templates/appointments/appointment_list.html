@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appointments - HealthCare HMS{% endblock %}
+
+{% block content %}
+<div class="row h-100">
+    <!-- Sidebar -->
+    <div class="col-md-3 sidebar">
+        <div class="p-4">
+            <div class="text-center mb-4">
+                <i class="fas fa-heartbeat" style="font-size: 2rem; color: white;"></i>
+                <h5 class="text-white mt-2">HealthCare HMS</h5>
+            </div>
+            
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{% url 'core:dashboard' %}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a class="nav-link" href="{% url 'patients:patient_list' %}">
+                    <i class="fas fa-users me-2"></i>Patients
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-user-md me-2"></i>Doctors
+                </a>
+                <a class="nav-link active" href="#">
+                    <i class="fas fa-calendar-alt me-2"></i>Appointments
+                </a>
+                <a class="nav-link" href="{% url 'inventory:inventory_list' %}">
+                    <i class="fas fa-pills me-2"></i>Inventory
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-bar me-2"></i>Reports
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9 content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Appointments</h2>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Appointment
+            </button>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="card">
+            <div class="card-header" style="background: var(--light-teal); border: none;">
+                <h5 class="fw-bold mb-0">All Appointments</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments %}
+                            <tr>
+                                <td>#{{ appointment.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle me-2" style="color: var(--primary-teal);"></i>
+                                        {{ appointment.patient.user.get_full_name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-md me-2" style="color: var(--secondary-teal);"></i>
+                                        Dr. {{ appointment.doctor.user.get_full_name }}
+                                    </div>
+                                </td>
+                                <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                                <td>{{ appointment.appointment_time|time:"g:i A"|default:"--" }}</td>
+                                <td>
+                                    <span class="badge rounded-pill" style="background: var(--primary-teal);">
+                                        {{ appointment.get_status_display|default:"Scheduled" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                    <p>No appointments found</p>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Create First Appointment
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

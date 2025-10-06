@@ -22,14 +22,15 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),
     path('patients/', include('patients.urls')),
     path('doctors/', include('doctors.urls')),
     path('appointments/', include('appointments.urls')),
     path('inventory/', include('inventory.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('', include('core.urls')),
 ]
 
+# Only add static file serving in DEBUG mode
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
