@@ -6,6 +6,7 @@ from doctors.models import Doctor
 from appointments.models import Appointment
 from inventory.models import Medicine
 
+
 def index(request):
     return render(request, 'core/index.html')
 

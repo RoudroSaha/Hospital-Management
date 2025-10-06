@@ -1,39 +1,73 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import InventoryItem
-from .forms import InventoryItemForm  # We'll create this form next
+# inventory/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Medicine
+from .forms import MedicineForm
 
-# List all inventory items
+@login_required
 def inventory_list(request):
-    items = InventoryItem.objects.all()
-    return render(request, 'inventory/inventory_list.html', {'items': items})
+    medicines = Medicine.objects.all().order_by('name')
+    context = {
+        'medicines': medicines,
+    }
+    return render(request, 'inventory/inventory_list.html', context)
 
-# Add a new inventory item
+@login_required
+def inventory_detail(request, pk):
+    medicine = get_object_or_404(Medicine, pk=pk)
+    context = {
+        'medicine': medicine,
+    }
+    return render(request, 'inventory/inventory_detail.html', context)
+
+@login_required
 def inventory_create(request):
     if request.method == 'POST':
-        form = InventoryItemForm(request.POST)
+        form = MedicineForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('inventory_list')
+            messages.success(request, 'Medicine added successfully!')
+            return redirect('inventory:inventory_list')
     else:
-        form = InventoryItemForm()
-    return render(request, 'inventory/inventory_form.html', {'form': form})
+        form = MedicineForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add Medicine',
+    }
+    return render(request, 'inventory/inventory_form.html', context)
 
-# Update an existing inventory item
+@login_required
 def inventory_update(request, pk):
-    item = get_object_or_404(InventoryItem, pk=pk)
+    medicine = get_object_or_404(Medicine, pk=pk)
+    
     if request.method == 'POST':
-        form = InventoryItemForm(request.POST, instance=item)
+        form = MedicineForm(request.POST, instance=medicine)
         if form.is_valid():
             form.save()
-            return redirect('inventory_list')
+            messages.success(request, 'Medicine updated successfully!')
+            return redirect('inventory:inventory_detail', pk=medicine.pk)
     else:
-        form = InventoryItemForm(instance=item)
-    return render(request, 'inventory/inventory_form.html', {'form': form})
+        form = MedicineForm(instance=medicine)
+    
+    context = {
+        'form': form,
+        'medicine': medicine,
+        'title': 'Update Medicine',
+    }
+    return render(request, 'inventory/inventory_form.html', context)
 
-# Delete an inventory item
+@login_required
 def inventory_delete(request, pk):
-    item = get_object_or_404(InventoryItem, pk=pk)
+    medicine = get_object_or_404(Medicine, pk=pk)
+    
     if request.method == 'POST':
-        item.delete()
-        return redirect('inventory_list')
-    return render(request, 'inventory/inventory_confirm_delete.html', {'item': item})
+        medicine.delete()
+        messages.success(request, 'Medicine deleted successfully!')
+        return redirect('inventory:inventory_list')
+    
+    context = {
+        'medicine': medicine,
+    }
+    return render(request, 'inventory/inventory_confirm_delete.html', context)

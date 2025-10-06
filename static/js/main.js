@@ -1,101 +1,154 @@
-// Main JavaScript for Hospital Management System
+// Main JavaScript functionality
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
+    // Initialize all main functionality
+    initNavigation();
+    initForms();
+    initNotifications();
+});
 
-    // Initialize popovers
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl)
-    });
+// Navigation functionality
+function initNavigation() {
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+        });
+    }
 
-    // Auto-dismiss alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            if (alert) {
-                bootstrap.Alert.getInstance(alert).close();
-            }
-        }, 5000);
+    // Active link highlighting
+    const currentPage = window.location.pathname.split('/').pop();
+    const navLinksAll = document.querySelectorAll('.nav-links a');
+    
+    navLinksAll.forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        if (linkPage === currentPage) {
+            link.classList.add('active');
+        }
     });
+}
 
-    // Form validation enhancement
-    const forms = document.querySelectorAll('.needs-validation');
+// Form handling
+function initForms() {
+    const forms = document.querySelectorAll('form');
+    
     forms.forEach(form => {
-        form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    });
-
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            
+            // Basic form validation
+            const inputs = form.querySelectorAll('input[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    showInputError(input, 'This field is required');
+                } else {
+                    clearInputError(input);
+                }
+            });
+            
+            if (isValid) {
+                // Simulate form submission
+                showNotification('Form submitted successfully!', 'success');
+                form.reset();
             }
         });
     });
+}
 
-    // Dynamic statistics update (example)
-    function updateStatistics() {
-        // This would typically make an AJAX call to update stats
-        console.log('Updating statistics...');
+// Input validation
+function showInputError(input, message) {
+    const formGroup = input.closest('.form-group');
+    let errorElement = formGroup.querySelector('.error-message');
+    
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        formGroup.appendChild(errorElement);
     }
+    
+    errorElement.textContent = message;
+    input.classList.add('error');
+}
 
-    // Set up periodic updates (every 30 seconds)
-    setInterval(updateStatistics, 30000);
-});
+function clearInputError(input) {
+    const formGroup = input.closest('.form-group');
+    const errorElement = formGroup.querySelector('.error-message');
+    
+    if (errorElement) {
+        errorElement.remove();
+    }
+    
+    input.classList.remove('error');
+}
+
+// Notification system
+function initNotifications() {
+    // Create notification container if it doesn't exist
+    if (!document.querySelector('.notification-container')) {
+        const notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notificationContainer = document.querySelector('.notification-container');
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button class="notification-close">&times;</button>
+    `;
+    
+    notificationContainer.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+    
+    // Close button functionality
+    notification.querySelector('.notification-close').addEventListener('click', function() {
+        notification.remove();
+    });
+}
 
 // Utility functions
-const HMS = {
-    // Show loading spinner
-    showLoading: function(button) {
-        const originalText = button.innerHTML;
-        button.innerHTML = '<span class="loading-spinner"></span> Loading...';
-        button.disabled = true;
-        return originalText;
-    },
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
 
-    // Hide loading spinner
-    hideLoading: function(button, originalText) {
-        button.innerHTML = originalText;
-        button.disabled = false;
-    },
+function formatTime(timeString) {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
 
-    // Format date
-    formatDate: function(dateString) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-
-    // Show notification
-    showNotification: function(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show`;
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
+// API simulation
+async function simulateApiCall(data, delay = 1000) {
+    return new Promise((resolve) => {
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 5000);
-    }
+            resolve({
+                success: true,
+                data: data,
+                message: 'Operation completed successfully'
+            });
+        }, delay);
+    });
+}
+
+// Export functions for use in other modules
+window.HealthApp = {
+    showNotification,
+    formatDate,
+    formatTime,
+    simulateApiCall
 };

@@ -1,133 +1,94 @@
-// Dashboard specific JavaScript
+// Dashboard specific functionality
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard loaded successfully');
-    
-    // Initialize charts
-    initStatsChart();
-    
-    // Refresh appointments functionality
-    const refreshBtn = document.getElementById('refreshAppointments');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            const originalHtml = this.innerHTML;
-            this.innerHTML = '<span class="loading-spinner"></span> Refreshing...';
-            this.disabled = true;
-            
-            // Simulate API call
-            setTimeout(() => {
-                this.innerHTML = originalHtml;
-                this.disabled = false;
-                HMS.showNotification('Appointments refreshed successfully!', 'success');
-            }, 1500);
-        });
-    }
-    
-    // Quick actions
-    const quickActions = document.querySelectorAll('.quick-action');
-    quickActions.forEach(action => {
-        action.addEventListener('click', function(e) {
-            e.preventDefault();
-            const actionType = this.getAttribute('data-action');
-            HMS.showNotification(`Opening ${actionType} management...`, 'info');
-            
-            // Simulate navigation delay
-            setTimeout(() => {
-                // Actual navigation would go here
-                console.log(`Navigating to ${actionType} section`);
-            }, 1000);
-        });
-    });
-    
-    // Real-time date update
-    function updateCurrentDate() {
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const dateString = now.toLocaleDateString('en-US', options);
-        const dateElement = document.getElementById('currentDate');
-        if (dateElement) {
-            dateElement.textContent = dateString;
-        }
-    }
-    
-    // Update date every minute
-    setInterval(updateCurrentDate, 60000);
-    
-    // Add hover effects to table rows
-    const tableRows = document.querySelectorAll('#appointmentsTable tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = '#f8f9fa';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-    });
+    initDashboard();
 });
 
-function initStatsChart() {
-    const ctx = document.getElementById('statsChart').getContext('2d');
+function initDashboard() {
+    // Load dashboard stats
+    loadDashboardStats();
     
-    // Sample data - in real app, this would come from API
-    const data = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [
-            {
-                label: 'Appointments',
-                data: [12, 19, 15, 22, 18, 8, 5],
-                borderColor: '#2563eb',
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                tension: 0.4,
-                fill: true
-            },
-            {
-                label: 'Patients',
-                data: [8, 12, 10, 15, 14, 6, 3],
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.4,
-                fill: true
-            }
-        ]
-    };
+    // Initialize charts if needed
+    initCharts();
     
-    const config = {
-        type: 'line',
-        data: data,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
+    // Set up auto-refresh for real-time data
+    setInterval(loadDashboardStats, 30000); // Refresh every 30 seconds
+}
+
+async function loadDashboardStats() {
+    try {
+        // Simulate API call to get dashboard data
+        const response = await HealthApp.simulateApiCall({
+            patients: 1247,
+            appointments: 23,
+            doctors: 15,
+            lowStock: 7,
+            recentAppointments: [
+                {
+                    patient: 'John Smith',
+                    doctor: 'Dr. Sarah Johnson',
+                    datetime: new Date().toISOString(),
+                    status: 'confirmed'
                 },
-                title: {
-                    display: false
+                {
+                    patient: 'Maria Garcia',
+                    doctor: 'Dr. Michael Chen',
+                    datetime: new Date().toISOString(),
+                    status: 'pending'
+                },
+                {
+                    patient: 'Robert Wilson',
+                    doctor: 'Dr. Emily Brown',
+                    datetime: new Date(Date.now() + 86400000).toISOString(),
+                    status: 'confirmed'
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    };
-    
-    new Chart(ctx, config);
+            ]
+        });
+        
+        updateDashboardUI(response.data);
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        HealthApp.showNotification('Error loading dashboard data', 'danger');
+    }
 }
 
-// Real-time statistics update (simulated)
-function updateStatistics() {
-    const stats = ['patients', 'doctors', 'appointments', 'medicines'];
+function updateDashboardUI(data) {
+    // Update stats cards
+    document.querySelector('.dashboard-card:nth-child(1) .number').textContent = data.patients.toLocaleString();
+    document.querySelector('.dashboard-card:nth-child(2) .number').textContent = data.appointments;
+    document.querySelector('.dashboard-card:nth-child(3) .number').textContent = data.doctors;
+    document.querySelector('.dashboard-card:nth-child(4) .number').textContent = data.lowStock;
     
-    stats.forEach(stat => {
-        const element = document.querySelector(`[data-stat="${stat}"] .stat-number`);
-        if (element) {
-            const currentValue = parseInt(element.textContent.replace(/,/g, ''));
-            const newValue = currentValue + Math.floor(Math.random() * 3);
-            element.textContent = newValue.toLocaleString();
-        }
-    });
+    // Update recent appointments table
+    updateAppointmentsTable(data.recentAppointments);
 }
 
-// Update statistics every 30 seconds
-setInterval(updateStatistics, 30000);
+function updateAppointmentsTable(appointments) {
+    const tbody = document.querySelector('.table tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = appointments.map(appointment => `
+        <tr>
+            <td>${appointment.patient}</td>
+            <td>${appointment.doctor}</td>
+            <td>${HealthApp.formatDate(appointment.datetime)}</td>
+            <td>
+                <span class="badge badge-${appointment.status === 'confirmed' ? 'primary' : 'warning'}">
+                    ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function initCharts() {
+    // Initialize any charts here
+    // This is a placeholder for chart initialization
+    console.log('Charts initialized');
+}
+
+// Export dashboard functions
+window.Dashboard = {
+    loadDashboardStats,
+    updateDashboardUI
+};

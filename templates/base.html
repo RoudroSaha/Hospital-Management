@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hospital Management System - Your Partner in Health and Wellness{% endblock %}</title>
+    <title>{% block title %}HealthCare HMS{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Main CSS -->
     <link href="/static/css/main.css" rel="stylesheet">
@@ -24,7 +27,7 @@
     {% if not hide_navbar %}
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'index' %}">
+            <a class="navbar-brand fw-bold" href="{% url 'core:index' %}">
                 <i class="fas fa-hospital me-2" style="color: #2563eb;"></i>
                 <span style="color: #2563eb;">HealthCare</span> HMS
             </a>
@@ -36,34 +39,42 @@
                             <i class="fas fa-user-circle me-1"></i> {{ user.get_full_name|default:user.username }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'password_change' %}"><i class="fas fa-key me-2"></i>Change Password</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
                         </ul>
                     </div>
                 {% else %}
-                    <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
-                    <a class="btn btn-primary" href="#">Register</a>
+                    <a class="nav-link" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-1"></i> Login
+                    </a>
                 {% endif %}
             </div>
         </div>
     </nav>
     {% endif %}
 
-    <main>
-        {% block content %}
-        {% endblock %}
+    <main class="{% if not hide_navbar %}pt-4{% endif %}">
+        {% if messages %}
+            <div class="container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Main JS -->
-    <script src="/static/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Page-specific JS -->
     {% block extra_js %}{% endblock %}

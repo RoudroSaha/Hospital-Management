@@ -18,16 +18,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import index, dashboard
 
 
 urlpatterns = [
-     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # core app as home
-    path('doctors/', include('doctors.urls')),
+    path('admin/', admin.site.urls),
+    path('', include('core.urls')),
     path('patients/', include('patients.urls')),
+    path('doctors/', include('doctors.urls')),
     path('appointments/', include('appointments.urls')),
     path('inventory/', include('inventory.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
 if settings.DEBUG:
