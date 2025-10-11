@@ -1,21 +1,34 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import Patients ,Doctors
 
-class Patient(models.Model):
-    BLOOD_GROUPS = [
-        ('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'),
-        ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-'),
-    ]
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    date_of_birth = models.DateField()
-    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUPS, blank=True)
-    emergency_contact = models.CharField(max_length=15, blank=True)
-    medical_history = models.TextField(blank=True)
-    
+class Time(models.Model):
+    time = models.CharField(max_length=10)
+    class Meta:
+        verbose_name = "Time"
+        verbose_name_plural = "Times"
     def __str__(self):
-        return self.user.get_full_name()
+        return self.time
     
-    def age(self):
-        from datetime import date
-        return (date.today() - self.date_of_birth).days // 365
+class Status(models.Model):
+    status =  models.CharField(max_length=20) 
+    class Meta:
+        verbose_name = "Status"
+        verbose_name_plural = "Status"
+    def __str__(self):
+        return self.status
+
+class Appointment(models.Model):
+    doctor = models.ForeignKey(Doctors, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE, )
+    summary = models.TextField()
+    description = models.TextField()
+    start_date = models.DateField()
+    status = models.ForeignKey(Status, on_delete=models.CASCADE, )
+    time = models.ForeignKey(Time, on_delete=models.CASCADE, default=1)
+    class Meta:
+        verbose_name = "Appointment"
+        verbose_name_plural = "Appointments"
+    def __str__(self):
+        return self.summary
+    
+
